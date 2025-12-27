@@ -49,18 +49,19 @@ class TwilioService:
             JWT access token string
         """
         try:
-            # Create access token
+            # Create access token with Account SID as signing key
+            # For production, you should create API Keys in Twilio Console
             token = AccessToken(
                 self.account_sid,
-                settings.TWILIO_ACCOUNT_SID,  # API Key SID (using account SID for simplicity)
-                settings.TWILIO_AUTH_TOKEN,   # API Key Secret
+                self.account_sid,  # Using Account SID as API Key for development
+                self.auth_token,   # Using Auth Token as secret
                 identity=identity,
                 ttl=ttl
             )
 
             # Create Voice grant
             voice_grant = VoiceGrant(
-                outgoing_application_sid=self.app_sid,
+                outgoing_application_sid=self.app_sid if self.app_sid else None,
                 incoming_allow=True
             )
 
@@ -70,7 +71,11 @@ class TwilioService:
             # Generate and return JWT
             jwt_token = token.to_jwt()
             logger.info(f"Generated access token for identity: {identity}")
-            return jwt_token.decode('utf-8') if isinstance(jwt_token, bytes) else jwt_token
+
+            # Handle both string and bytes return types
+            if isinstance(jwt_token, bytes):
+                return jwt_token.decode('utf-8')
+            return str(jwt_token)
 
         except Exception as e:
             logger.error(f"Error generating access token: {str(e)}")
