@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 from api.client_views import agent_call_client
 =======
@@ -18,6 +19,13 @@ from api.views import agent_call_client, test_config, setup_wizard
 from api.client_views import agent_call_client
 >>>>>>> 112da331858069236e6e4f4068c00cdc1ca10db5
 >>>>>>> Stashed changes
+=======
+<<<<<<< HEAD
+from api.views import agent_call_client, test_config, setup_wizard
+=======
+from api.client_views import agent_call_client
+>>>>>>> 112da331858069236e6e4f4068c00cdc1ca10db5
+>>>>>>> 595f721aa04a7402cd23648f6ddfceef959070d4
 
 # API Documentation
 schema_view = get_schema_view(
@@ -49,6 +57,12 @@ urlpatterns = [
 
     # Webhooks
     path('webhooks/', include('calls.urls')),
+
+    # Frontend pages
+    path('', setup_wizard, name='home'),  # Home page - Setup wizard
+    path('setup/', setup_wizard, name='setup_wizard'),
+    path('agent_call_client.html', agent_call_client, name='agent_call_client'),
+    path('test_config.html', test_config, name='test_config'),
 ]
 
 # Serve media files in development

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twilio Setup Checker - Step by Step</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .step.complete {
+            border-left-color: #10b981;
+            background: #d1fae5;
+        }
+
+        .step.incomplete {
+            border-left-color: #ef4444;
+            background: #fee2e2;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .info-box {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ef4444;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #10b981;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        code {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        pre {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        ol, ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .credential-display {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 5px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Twilio Setup Checker</h1>
+        <p style="color: #666; margin-bottom: 30px;">Let's get your Twilio credentials configured properly!</p>
+
+        <div class="error-box">
+            <strong>⚠️ You're seeing "Failed to get Twilio token" because:</strong><br>
+            Your Twilio credentials are not configured yet. Follow the steps below to fix this!
+        </div>
+
+        <!-- Step 1: Get Twilio Credentials -->
+        <div class="step" id="step1">
+            <h2>Step 1: Get Your Twilio Credentials</h2>
+
+            <div class="info-box">
+                <strong>📋 You need 4 things from Twilio Console:</strong><br>
+                1. Account SID<br>
+                2. Auth Token<br>
+                3. Phone Number<br>
+                4. TwiML App SID
+            </div>
+
+            <ol>
+                <li>
+                    <strong>Open Twilio Console:</strong><br>
+                    <a href="https://console.twilio.com/" target="_blank">https://console.twilio.com/</a>
+                </li>
+                <li>
+                    <strong>Get Account SID and Auth Token:</strong><br>
+                    Look at the main dashboard. You'll see:
+                    <ul>
+                        <li>Account SID: Starts with <code>AC...</code> (about 34 characters)</li>
+                        <li>Auth Token: Click "Show" to reveal (about 32 characters)</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Get Phone Number:</strong><br>
+                    Go to: <a href="https://console.twilio.com/us1/develop/phone-numbers/manage/incoming" target="_blank">Phone Numbers → Manage → Active Numbers</a><br>
+                    If you don't have one, <a href="https://console.twilio.com/us1/develop/phone-numbers/manage/search" target="_blank">buy a number</a> (starts with <code>+1...</code>)
+                </li>
+                <li>
+                    <strong>Create TwiML App:</strong><br>
+                    Go to: <a href="https://console.twilio.com/us1/develop/voice/manage/twiml-apps" target="_blank">Voice → TwiML Apps</a><br>
+                    Click "Create new TwiML App":
+                    <ul>
+                        <li>Friendly Name: <code>Twilio CRM</code></li>
+                        <li>Voice URL: <code>http://localhost:8000/webhooks/voice/</code></li>
+                        <li>Save and copy the App SID (starts with <code>AP...</code>)</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <button onclick="testStep1()">✓ I Have My Credentials</button>
+            <div id="step1-result"></div>
+        </div>
+
+        <!-- Step 2: Configure .env File -->
+        <div class="step" id="step2">
+            <h2>Step 2: Configure Your .env File</h2>
+
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> You need to edit the <code>.env</code> file in your project root directory.
+            </div>
+
+            <p><strong>Location:</strong> <code>Twilio-Dialer/.env</code></p>
+
+            <p><strong>Edit the file and replace these values with your REAL Twilio credentials:</strong></p>
+
+            <pre>TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_PHONE_NUMBER=+1234567890
+TWILIO_APP_SID=APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</pre>
+
+            <div class="info-box">
+                <strong>Example of what it should look like:</strong><br>
+                <code>TWILIO_ACCOUNT_SID=ACabcd1234...your_actual_sid</code><br>
+                <code>TWILIO_AUTH_TOKEN=xyz789...your_actual_token</code><br>
+                <code>TWILIO_PHONE_NUMBER=+15551234567</code><br>
+                <code>TWILIO_APP_SID=APabcd1234...your_actual_app_sid</code>
+            </div>
+
+            <div class="error-box">
+                <strong>Common Mistakes to Avoid:</strong><br>
+                ❌ Don't leave the placeholder values (<code>ACxxxxxxxx...</code>)<br>
+                ❌ Don't add spaces around the <code>=</code> sign<br>
+                ❌ Don't use quotes around the values<br>
+                ✅ Just paste your actual values directly
+            </div>
+
+            <button onclick="testStep2()">✓ I Updated My .env File</button>
+            <div id="step2-result"></div>
+        </div>
+
+        <!-- Step 3: Restart Server -->
+        <div class="step" id="step3">
+            <h2>Step 3: Restart Django Server</h2>
+
+            <div class="warning-box">
+                <strong>⚠️ Critical:</strong> Django doesn't automatically reload .env changes. You MUST restart the server!
+            </div>
+
+            <p><strong>Steps:</strong></p>
+            <ol>
+                <li>Go to your terminal/command prompt where the server is running</li>
+                <li>Press <code>Ctrl+C</code> to stop the server</li>
+                <li>Run this command to restart:
+                    <pre>python manage.py runserver 0.0.0.0:8000</pre>
+                </li>
+                <li>Wait for: <code>Starting development server at http://0.0.0.0:8000/</code></li>
+            </ol>
+
+            <button onclick="testStep3()">✓ I Restarted the Server</button>
+            <div id="step3-result"></div>
+        </div>
+
+        <!-- Step 4: Test Connection -->
+        <div class="step" id="step4">
+            <h2>Step 4: Test Your Configuration</h2>
+
+            <p>Click the button below to test if your Twilio credentials are working:</p>
+
+            <button onclick="runFullTest()">🧪 Test My Twilio Setup</button>
+            <div id="step4-result"></div>
+        </div>
+
+        <div id="final-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+
+        function testStep1() {
+            document.getElementById('step1-result').innerHTML = `
+                <div class="success-box" style="margin-top: 15px;">
+                    ✅ Great! Now move to Step 2 to configure your .env file.
+                </div>
+            `;
+            document.getElementById('step1').classList.add('complete');
+        }
+
+        function testStep2() {
+            document.getElementById('step2-result').innerHTML = `
+                <div class="success-box" style="margin-top: 15px;">
+                    ✅ Good! Now RESTART your server in Step 3 (very important!).
+                </div>
+            `;
+            document.getElementById('step2').classList.add('complete');
+        }
+
+        function testStep3() {
+            document.getElementById('step3-result').innerHTML = `
+                <div class="success-box" style="margin-top: 15px;">
+                    ✅ Server restarted! Now test your configuration in Step 4.
+                </div>
+            `;
+            document.getElementById('step3').classList.add('complete');
+        }
+
+        async function runFullTest() {
+            const resultDiv = document.getElementById('step4-result');
+            const finalDiv = document.getElementById('final-result');
+
+            resultDiv.innerHTML = '<div class="info-box" style="margin-top: 15px;"><div class="spinner"></div>Testing your Twilio configuration...</div>';
+
+            try {
+                // Step 1: Login
+                const loginResponse = await fetch(`${API_BASE}/auth/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'agent1', password: 'test123' })
+                });
+
+                if (!loginResponse.ok) {
+                    throw new Error('Login failed. Make sure you ran: python create_test_users.py');
+                }
+
+                const { access } = await loginResponse.json();
+
+                // Step 2: Test Twilio Token
+                const tokenResponse = await fetch(`${API_BASE}/twilio/token/`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${access}` }
+                });
+
+                if (!tokenResponse.ok) {
+                    const errorText = await tokenResponse.text();
+                    let errorMsg = errorText;
+
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMsg = errorJson.error || errorJson.detail || errorText;
+                    } catch (e) {
+                        // Keep original error text
+                    }
+
+                    throw new Error(errorMsg);
+                }
+
+                const { token, identity } = await tokenResponse.json();
+
+                // Success!
+                resultDiv.innerHTML = `
+                    <div class="success-box" style="margin-top: 15px;">
+                        ✅ <strong>SUCCESS! Your Twilio configuration is working!</strong><br><br>
+                        Identity: ${identity}<br>
+                        Token generated successfully!
+                    </div>
+                `;
+
+                document.getElementById('step4').classList.add('complete');
+
+                finalDiv.innerHTML = `
+                    <div class="success-box" style="margin-top: 30px; padding: 30px;">
+                        <h2 style="color: #065f46; margin-bottom: 15px;">🎉 All Set! Your Twilio CRM is Ready!</h2>
+
+                        <p style="margin-bottom: 15px;"><strong>Next Steps:</strong></p>
+
+                        <div class="info-box" style="background: white; color: #333; border-left-color: #667eea;">
+                            <strong>For FREE Testing (Trial Account):</strong><br>
+                            1. Verify your phone number:
+                               <a href="https://console.twilio.com/us1/develop/phone-numbers/manage/verified" target="_blank">
+                                   Twilio Verified Caller IDs
+                               </a><br>
+                            2. Call that verified number for FREE!<br><br>
+
+                            <strong>For Paid Calling (Any Number):</strong><br>
+                            1. Add credits:
+                               <a href="https://console.twilio.com/billing/add-funds" target="_blank">
+                                   Add Funds ($20 minimum)
+                               </a><br>
+                            2. Call any number worldwide!
+                        </div>
+
+                        <p style="margin-top: 20px;"><strong>Start Making Calls:</strong></p>
+                        <a href="/agent_call_client.html" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 10px;">
+                            📞 Open Call Client
+                        </a>
+                    </div>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error-box" style="margin-top: 15px;">
+                        <strong>❌ Configuration Error:</strong><br><br>
+                        ${error.message}<br><br>
+
+                        <strong>How to Fix:</strong><br>
+                        1. Check your .env file has REAL Twilio credentials (not placeholders)<br>
+                        2. Get credentials from: <a href="https://console.twilio.com/" target="_blank">Twilio Console</a><br>
+                        3. Make sure you RESTARTED the server after editing .env<br>
+                        4. Verify there are no spaces around the = sign in .env<br><br>
+
+                        <strong>Need Help?</strong><br>
+                        Open your browser console (F12) to see detailed error messages.
+                    </div>
+                `;
+
+                document.getElementById('step4').classList.add('incomplete');
+            }
+        }
+
+        // Show helpful info on page load
+        window.onload = () => {
+            console.log('%c🔧 Twilio Setup Helper', 'font-size: 20px; color: #667eea; font-weight: bold;');
+            console.log('%cFollow the steps on this page to configure your Twilio credentials.', 'font-size: 14px; color: #666;');
+            console.log('%cNeed help? All the links and instructions are on the page!', 'font-size: 14px; color: #666;');
+        };
+    </script>
+</body>
+</html>
