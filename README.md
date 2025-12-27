@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+"# Twilio Dialer Project" 
+=======
 # Twilio VoIP & WebRTC CRM System
 
 A comprehensive Django-based CRM system integrated with Twilio Programmable Voice and WebRTC for browser-based and mobile calling, featuring call tracking, recording, and analytics.
@@ -454,3 +457,4 @@ Contributions are welcome! Please:
 ---
 
 **Built with ❤️ using Django and Twilio**
+>>>>>>> 1399587cc1b5f1dc5fb78af70320db51dd32ee08
