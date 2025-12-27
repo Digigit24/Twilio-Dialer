@@ -5,10 +5,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+<<<<<<< HEAD
 from api.views import agent_call_client, test_config, setup_wizard
+=======
+from api.client_views import agent_call_client
+>>>>>>> 112da331858069236e6e4f4068c00cdc1ca10db5
 
 # API Documentation
 schema_view = get_schema_view(
@@ -26,6 +31,10 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Client Applications
+    path('', agent_call_client, name='home'),
+    path('agent_call_client.html', agent_call_client, name='agent_call_client'),
 
     # API Documentation
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
