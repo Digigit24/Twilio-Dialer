@@ -6,6 +6,7 @@ from django.db.models import Q, Count, Sum, Avg
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.shortcuts import render
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -420,3 +421,14 @@ def agent_statistics(request):
 
     serializer = AgentStatsSerializer(agent_stats, many=True)
     return Response(serializer.data)
+
+
+# Template views for HTML pages
+def agent_call_client(request):
+    """Render the agent call client page."""
+    return render(request, 'agent_call_client.html')
+
+
+def test_config(request):
+    """Render the configuration test page."""
+    return render(request, 'test_config.html')

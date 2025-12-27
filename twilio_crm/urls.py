@@ -8,6 +8,7 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from api.views import agent_call_client, test_config
 
 # API Documentation
 schema_view = get_schema_view(
@@ -35,6 +36,10 @@ urlpatterns = [
 
     # Webhooks
     path('webhooks/', include('calls.urls')),
+
+    # Frontend pages
+    path('agent_call_client.html', agent_call_client, name='agent_call_client'),
+    path('test_config.html', test_config, name='test_config'),
 ]
 
 # Serve media files in development
