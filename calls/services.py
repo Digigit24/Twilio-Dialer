@@ -23,7 +23,19 @@ class TwilioService:
         self.auth_token = settings.TWILIO_AUTH_TOKEN
         self.phone_number = settings.TWILIO_PHONE_NUMBER
         self.app_sid = settings.TWILIO_APP_SID
-        self.client = Client(self.account_sid, self.auth_token)
+        self._client = None
+
+    @property
+    def client(self):
+        """Lazy initialization of Twilio client."""
+        if self._client is None:
+            if not self.account_sid or not self.auth_token:
+                raise ValueError(
+                    "Twilio credentials not configured. "
+                    "Please set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in .env file"
+                )
+            self._client = Client(self.account_sid, self.auth_token)
+        return self._client
 
     def generate_access_token(self, identity: str, ttl: int = 3600) -> str:
         """
