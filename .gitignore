@@ -58,3 +58,6 @@ htmlcov/
 # Recordings
 media/recordings/*
 !media/recordings/.gitkeep
+
+# Credentials (contains actual Twilio credentials)
+CREDENTIALS.md
