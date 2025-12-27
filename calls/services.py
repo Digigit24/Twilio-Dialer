@@ -52,26 +52,48 @@ class TwilioService:
             JWT access token string
         """
         try:
+<<<<<<< HEAD
             # Check if we have API Keys configured
             api_key_sid = getattr(settings, 'TWILIO_API_KEY_SID', None)
             api_key_secret = getattr(settings, 'TWILIO_API_KEY_SECRET', None)
             
             # Use API Keys if available, otherwise use Account SID/Auth Token
+=======
+            # Check if we have API Keys configured (RECOMMENDED)
+            api_key_sid = getattr(settings, 'TWILIO_API_KEY_SID', None)
+            api_key_secret = getattr(settings, 'TWILIO_API_KEY_SECRET', None)
+
+            # Use API Keys if available and not empty, otherwise fall back to Account SID/Token
+>>>>>>> 1ffcde2c6cf1f2b4b6b09597aa09389e533506d0
             if api_key_sid and api_key_secret and api_key_sid.strip() and api_key_secret.strip():
                 # Production: Use API Keys (RECOMMENDED)
                 signing_key_sid = api_key_sid
                 signing_key_secret = api_key_secret
+<<<<<<< HEAD
                 logger.info(f"Using API Key for token generation: {signing_key_sid}")
+=======
+                logger.info(f"✓ Using API Key for token generation: {signing_key_sid[:8]}...")
+>>>>>>> 1ffcde2c6cf1f2b4b6b09597aa09389e533506d0
             else:
                 # Development: Use Account SID and Auth Token
                 signing_key_sid = self.account_sid
                 signing_key_secret = self.auth_token
+<<<<<<< HEAD
                 logger.warning("Using Account SID/Token for token generation (not recommended for production)")
+=======
+                logger.warning("⚠ Using Account SID/Token for token generation (not recommended for production)")
+>>>>>>> 1ffcde2c6cf1f2b4b6b09597aa09389e533506d0
 
             # Validate required settings
             if not self.account_sid or not signing_key_sid or not signing_key_secret:
                 raise ValueError("Missing required Twilio credentials")
 
+<<<<<<< HEAD
+=======
+            if not self.app_sid:
+                raise ValueError("TWILIO_APP_SID is required for WebRTC calling")
+
+>>>>>>> 1ffcde2c6cf1f2b4b6b09597aa09389e533506d0
             # Create access token
             token = AccessToken(
                 self.account_sid,      # Twilio Account SID
@@ -92,16 +114,26 @@ class TwilioService:
 
             # Generate and return JWT
             jwt_token = token.to_jwt()
+<<<<<<< HEAD
             
             logger.info(f"Generated access token for identity: {identity}")
             
+=======
+
+            logger.info(f"✓ Generated access token for identity: {identity} (TTL: {ttl}s)")
+
+>>>>>>> 1ffcde2c6cf1f2b4b6b09597aa09389e533506d0
             # Decode if bytes
             if isinstance(jwt_token, bytes):
                 return jwt_token.decode('utf-8')
             return str(jwt_token)
 
         except Exception as e:
+<<<<<<< HEAD
             logger.error(f"Error generating access token: {str(e)}", exc_info=True)
+=======
+            logger.error(f"✗ Error generating access token: {str(e)}", exc_info=True)
+>>>>>>> 1ffcde2c6cf1f2b4b6b09597aa09389e533506d0
             raise
 
 
