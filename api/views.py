@@ -432,3 +432,8 @@ def agent_call_client(request):
 def test_config(request):
     """Render the configuration test page."""
     return render(request, 'test_config.html')
+
+
+def setup_wizard(request):
+    """Render the setup wizard page."""
+    return render(request, 'setup_wizard.html')
