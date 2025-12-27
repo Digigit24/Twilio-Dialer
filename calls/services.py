@@ -23,6 +23,9 @@ class TwilioService:
         self.auth_token = settings.TWILIO_AUTH_TOKEN
         self.phone_number = settings.TWILIO_PHONE_NUMBER
         self.app_sid = settings.TWILIO_APP_SID
+        # API Keys for JWT token generation (optional, falls back to Account SID/Token)
+        self.api_key_sid = getattr(settings, 'TWILIO_API_KEY_SID', None)
+        self.api_key_secret = getattr(settings, 'TWILIO_API_KEY_SECRET', None)
         self._client = None
 
     @property
@@ -49,12 +52,23 @@ class TwilioService:
             JWT access token string
         """
         try:
+            # Use API Keys if available, otherwise fall back to Account SID/Token
+            if self.api_key_sid and self.api_key_secret:
+                # Production: Use API Keys
+                api_key_sid = self.api_key_sid
+                api_key_secret = self.api_key_secret
+                logger.info(f"Using API Key for token generation: {api_key_sid}")
+            else:
+                # Development: Use Account SID and Auth Token
+                api_key_sid = self.account_sid
+                api_key_secret = self.auth_token
+                logger.info("Using Account SID/Token for token generation (development mode)")
+
             # Create access token
-            # For development, we use Account SID as the signing key
             token = AccessToken(
                 self.account_sid,     # Twilio Account SID
-                self.account_sid,     # API Key SID (using Account SID for development)
-                self.auth_token,      # API Key Secret (using Auth Token for development)
+                api_key_sid,          # API Key SID (or Account SID for dev)
+                api_key_secret,       # API Key Secret (or Auth Token for dev)
                 identity=identity,
                 ttl=ttl
             )
