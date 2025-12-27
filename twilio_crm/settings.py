@@ -187,6 +187,11 @@ TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
 TWILIO_APP_SID = os.getenv('TWILIO_APP_SID', '')
 
+# Twilio API Keys (RECOMMENDED for WebRTC - more secure than using Account SID/Token)
+# Create at: https://console.twilio.com/us1/account/keys-credentials/api-keys
+TWILIO_API_KEY_SID = os.getenv('TWILIO_API_KEY_SID', '')
+TWILIO_API_KEY_SECRET = os.getenv('TWILIO_API_KEY_SECRET', '')
+
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
