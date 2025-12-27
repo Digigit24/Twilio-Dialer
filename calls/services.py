@@ -50,10 +50,11 @@ class TwilioService:
         """
         try:
             # Create access token
+            # For development, we use Account SID as the signing key
             token = AccessToken(
-                self.account_sid,
-                settings.TWILIO_ACCOUNT_SID,  # API Key SID (using account SID for simplicity)
-                settings.TWILIO_AUTH_TOKEN,   # API Key Secret
+                self.account_sid,     # Twilio Account SID
+                self.account_sid,     # API Key SID (using Account SID for development)
+                self.auth_token,      # API Key Secret (using Auth Token for development)
                 identity=identity,
                 ttl=ttl
             )
