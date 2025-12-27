@@ -61,12 +61,12 @@ class TwilioService:
                 # Production: Use API Keys (RECOMMENDED)
                 signing_key_sid = api_key_sid
                 signing_key_secret = api_key_secret
-                logger.info(f"✓ Using API Key for token generation: {signing_key_sid[:8]}...")
+                logger.info(f"[OK] Using API Key for token generation: {signing_key_sid[:8]}...")
             else:
                 # Development: Use Account SID and Auth Token
                 signing_key_sid = self.account_sid
                 signing_key_secret = self.auth_token
-                logger.warning("⚠ Using Account SID/Token for token generation (not recommended for production)")
+                logger.warning("[WARNING] Using Account SID/Token for token generation (not recommended for production)")
 
             # Validate required settings
             if not self.account_sid or not signing_key_sid or not signing_key_secret:
@@ -96,7 +96,7 @@ class TwilioService:
             # Generate and return JWT
             jwt_token = token.to_jwt()
 
-            logger.info(f"✓ Generated access token for identity: {identity} (TTL: {ttl}s)")
+            logger.info(f"[OK] Generated access token for identity: {identity} (TTL: {ttl}s)")
 
             # Decode if bytes
             if isinstance(jwt_token, bytes):
@@ -104,7 +104,7 @@ class TwilioService:
             return str(jwt_token)
 
         except Exception as e:
-            logger.error(f"✗ Error generating access token: {str(e)}", exc_info=True)
+            logger.error(f"[ERROR] Error generating access token: {str(e)}", exc_info=True)
             raise
 
     def make_call(
