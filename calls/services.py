@@ -23,6 +23,9 @@ class TwilioService:
         self.auth_token = settings.TWILIO_AUTH_TOKEN
         self.phone_number = settings.TWILIO_PHONE_NUMBER
         self.app_sid = settings.TWILIO_APP_SID
+        # API Keys for JWT token generation (optional, falls back to Account SID/Token)
+        self.api_key_sid = getattr(settings, 'TWILIO_API_KEY_SID', None)
+        self.api_key_secret = getattr(settings, 'TWILIO_API_KEY_SECRET', None)
         self._client = None
 
     @property
@@ -49,12 +52,31 @@ class TwilioService:
             JWT access token string
         """
         try:
+            # Check if we have API Keys configured
+            api_key_sid = getattr(settings, 'TWILIO_API_KEY_SID', None)
+            api_key_secret = getattr(settings, 'TWILIO_API_KEY_SECRET', None)
+            
+            # Use API Keys if available, otherwise use Account SID/Auth Token
+            if api_key_sid and api_key_secret and api_key_sid.strip() and api_key_secret.strip():
+                # Production: Use API Keys (RECOMMENDED)
+                signing_key_sid = api_key_sid
+                signing_key_secret = api_key_secret
+                logger.info(f"Using API Key for token generation: {signing_key_sid}")
+            else:
+                # Development: Use Account SID and Auth Token
+                signing_key_sid = self.account_sid
+                signing_key_secret = self.auth_token
+                logger.warning("Using Account SID/Token for token generation (not recommended for production)")
+
+            # Validate required settings
+            if not self.account_sid or not signing_key_sid or not signing_key_secret:
+                raise ValueError("Missing required Twilio credentials")
+
             # Create access token
-            # For development, we use Account SID as the signing key
             token = AccessToken(
-                self.account_sid,     # Twilio Account SID
-                self.account_sid,     # API Key SID (using Account SID for development)
-                self.auth_token,      # API Key Secret (using Auth Token for development)
+                self.account_sid,      # Twilio Account SID
+                signing_key_sid,       # API Key SID (or Account SID for dev)
+                signing_key_secret,    # API Key Secret (or Auth Token for dev)
                 identity=identity,
                 ttl=ttl
             )
@@ -70,12 +92,18 @@ class TwilioService:
 
             # Generate and return JWT
             jwt_token = token.to_jwt()
+            
             logger.info(f"Generated access token for identity: {identity}")
-            return jwt_token.decode('utf-8') if isinstance(jwt_token, bytes) else jwt_token
+            
+            # Decode if bytes
+            if isinstance(jwt_token, bytes):
+                return jwt_token.decode('utf-8')
+            return str(jwt_token)
 
         except Exception as e:
-            logger.error(f"Error generating access token: {str(e)}")
+            logger.error(f"Error generating access token: {str(e)}", exc_info=True)
             raise
+
 
     def make_call(
         self,
