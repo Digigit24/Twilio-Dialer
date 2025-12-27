@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twilio CRM - Agent Call Client</title>
+    <script src="https://sdk.twilio.com/js/client/releases/1.14.0/twilio.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .status.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .phone-input {
+            position: relative;
+        }
+
+        .phone-input::before {
+            content: '📞';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+        }
+
+        .phone-input input {
+            padding-left: 45px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎧 Twilio CRM Call Client</h1>
+        <p class="subtitle">Make and receive calls using WebRTC</p>
+
+        <!-- Login Section -->
+        <div id="loginSection">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" value="agent1" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" value="test123" placeholder="Enter password">
+            </div>
+            <button class="btn-primary" onclick="login()">Login & Connect</button>
+        </div>
+
+        <!-- Call Section -->
+        <div id="callSection" class="hidden">
+            <div class="form-group phone-input">
+                <label>Phone Number to Call</label>
+                <input type="tel" id="phoneNumber" placeholder="+1234567890">
+            </div>
+            <button id="callBtn" class="btn-success" onclick="makeCall()">
+                📞 Make Call
+            </button>
+            <button id="hangupBtn" class="btn-danger hidden" onclick="hangup()">
+                ❌ Hang Up
+            </button>
+            <button class="btn-primary" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Status Display -->
+        <div id="status"></div>
+    </div>
+
+    <script>
+        let device;
+        let connection;
+        const API_BASE = window.location.origin + '/api';
+
+        // Helper function to get CSRF token from cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                showStatus('❌ Please enter username and password', 'error');
+                return;
+            }
+
+            showStatus('<div class="spinner"></div>Logging in...', 'info');
+
+            try {
+                // Get CSRF token
+                const csrftoken = getCookie('csrftoken');
+
+                // Step 1: Login with cookie-based authentication
+                const loginResponse = await fetch(`${API_BASE}/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    credentials: 'include',  // Important: Include cookies
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!loginResponse.ok) {
+                    const errorData = await loginResponse.json();
+                    throw new Error(errorData.error || 'Login failed. Check username and password.');
+                }
+
+                const loginData = await loginResponse.json();
+                console.log('Login successful:', loginData);
+
+                // Store user data (optional, since we have cookies)
+                localStorage.setItem('user', JSON.stringify(loginData.user));
+
+                // Step 2: Get Twilio Token
+                showStatus('<div class="spinner"></div>Getting Twilio token...', 'info');
+
+                const tokenResponse = await fetch(`${API_BASE}/twilio/token/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    credentials: 'include'  // Use cookie authentication
+                });
+
+                if (!tokenResponse.ok) {
+                    throw new Error('Failed to get Twilio token');
+                }
+
+                const { token, identity } = await tokenResponse.json();
+
+                // Step 3: Initialize Twilio Device
+                showStatus('<div class="spinner"></div>Connecting to Twilio...', 'info');
+
+                device = new Twilio.Device(token);
+
+                device.on('ready', () => {
+                    showStatus(`✅ Ready! Connected as ${identity} (${loginData.user.username})`, 'success');
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('callSection').classList.remove('hidden');
+                });
+
+                device.on('error', (error) => {
+                    showStatus(`❌ Error: ${error.message}`, 'error');
+                    console.error('Device error:', error);
+                });
+
+                device.on('connect', (conn) => {
+                    connection = conn;
+                    showStatus('📞 Call connected!', 'success');
+                    document.getElementById('callBtn').classList.add('hidden');
+                    document.getElementById('hangupBtn').classList.remove('hidden');
+                });
+
+                device.on('disconnect', () => {
+                    showStatus('📴 Call ended', 'info');
+                    document.getElementById('callBtn').classList.remove('hidden');
+                    document.getElementById('hangupBtn').classList.add('hidden');
+                    connection = null;
+                });
+
+                device.on('incoming', (conn) => {
+                    showStatus('📞 Incoming call! Click answer to accept.', 'warning');
+                    if (confirm('Incoming call! Answer?')) {
+                        conn.accept();
+                    } else {
+                        conn.reject();
+                    }
+                });
+
+            } catch (error) {
+                showStatus(`❌ ${error.message}`, 'error');
+                console.error('Login error:', error);
+            }
+        }
+
+        async function makeCall() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+
+            if (!phoneNumber) {
+                showStatus('❌ Please enter a phone number', 'error');
+                return;
+            }
+
+            if (!device) {
+                showStatus('❌ Please login first', 'error');
+                return;
+            }
+
+            try {
+                showStatus(`📞 Calling ${phoneNumber}...`, 'info');
+                connection = device.connect({ To: phoneNumber });
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                console.error('Call error:', error);
+            }
+        }
+
+        function hangup() {
+            if (connection) {
+                connection.disconnect();
+            } else if (device) {
+                device.disconnectAll();
+            }
+        }
+
+        async function logout() {
+            try {
+                const csrftoken = getCookie('csrftoken');
+
+                // Disconnect Twilio device
+                if (device) {
+                    device.disconnectAll();
+                    device.destroy();
+                    device = null;
+                }
+
+                // Call logout endpoint
+                await fetch(`${API_BASE}/auth/logout/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    credentials: 'include'
+                });
+
+                // Clear local storage
+                localStorage.removeItem('user');
+
+                // Show login form
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('callSection').classList.add('hidden');
+                showStatus('👋 Logged out successfully', 'info');
+
+            } catch (error) {
+                console.error('Logout error:', error);
+                showStatus('❌ Logout failed, but you can try logging in again', 'warning');
+            }
+        }
+
+        // Auto-verify session on page load
+        window.onload = async () => {
+            try {
+                const csrftoken = getCookie('csrftoken');
+
+                const response = await fetch(`${API_BASE}/auth/verify/`, {
+                    credentials: 'include',
+                    headers: { 'X-CSRFToken': csrftoken }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showStatus(`👋 Welcome back, ${data.user.username}! Please login again to make calls.`, 'info');
+                } else {
+                    showStatus('🔐 Please login to start making calls', 'info');
+                }
+            } catch (error) {
+                showStatus('🔐 Please login to start making calls', 'info');
+            }
+        };
+    </script>
+</body>
+</html>
