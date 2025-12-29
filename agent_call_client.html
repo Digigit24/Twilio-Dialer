@@ -1,371 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Twilio CRM - Agent Call Client</title>
-    <script src="https://sdk.twilio.com/js/client/releases/1.14.0/twilio.min.js"></script>
+    <script src="https://sdk.twilio.com/js/voice/releases/2.11.0/twilio.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 10px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-primary:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+      }
+
+      .status {
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-size: 14px;
+      }
+
+      .status.info {
+        background: #dbeafe;
+        color: #1e40af;
+        border-left: 4px solid #3b82f6;
+      }
+
+      .status.success {
+        background: #d1fae5;
+        color: #065f46;
+        border-left: 4px solid #10b981;
+      }
+
+      .status.error {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+      }
+
+      .status.warning {
+        background: #fef3c7;
+        color: #92400e;
+        border-left: 4px solid #f59e0b;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .phone-input {
+        position: relative;
+      }
+
+      .phone-input::before {
+        content: "📞";
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+      }
+
+      .phone-input input {
+        padding-left: 45px;
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+        100% {
+          transform: rotate(360deg);
         }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        button {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 10px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-primary:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #059669;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        .status {
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-        
-        .status.info {
-            background: #dbeafe;
-            color: #1e40af;
-            border-left: 4px solid #3b82f6;
-        }
-        
-        .status.success {
-            background: #d1fae5;
-            color: #065f46;
-            border-left: 4px solid #10b981;
-        }
-        
-        .status.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border-left: 4px solid #ef4444;
-        }
-        
-        .status.warning {
-            background: #fef3c7;
-            color: #92400e;
-            border-left: 4px solid #f59e0b;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .phone-input {
-            position: relative;
-        }
-        
-        .phone-input::before {
-            content: '📞';
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-        }
-        
-        .phone-input input {
-            padding-left: 45px;
-        }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🎧 Twilio CRM Call Client</h1>
-        <p class="subtitle">Make and receive calls using WebRTC</p>
+      <h1>🎧 Twilio CRM Call Client</h1>
+      <p class="subtitle">Make and receive calls using WebRTC</p>
 
-        <!-- Login Section -->
-        <div id="loginSection">
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="username" value="agent1" placeholder="Enter username">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" value="test123" placeholder="Enter password">
-            </div>
-            <button class="btn-primary" onclick="login()">Login & Connect</button>
+      <!-- Login Section -->
+      <div id="loginSection">
+        <div class="form-group">
+          <label>Username</label>
+          <input
+            type="text"
+            id="username"
+            value="agent1"
+            placeholder="Enter username"
+          />
         </div>
-
-        <!-- Call Section -->
-        <div id="callSection" class="hidden">
-            <div class="form-group phone-input">
-                <label>Phone Number to Call</label>
-                <input type="tel" id="phoneNumber" placeholder="+1234567890">
-            </div>
-            <button id="callBtn" class="btn-success" onclick="makeCall()">
-                📞 Make Call
-            </button>
-            <button id="hangupBtn" class="btn-danger hidden" onclick="hangup()">
-                ❌ Hang Up
-            </button>
-            <button class="btn-primary" onclick="logout()">Logout</button>
+        <div class="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            id="password"
+            value="test123"
+            placeholder="Enter password"
+          />
         </div>
+        <button class="btn-primary" onclick="login()">Login & Connect</button>
+      </div>
 
-        <!-- Status Display -->
-        <div id="status"></div>
+      <!-- Call Section -->
+      <div id="callSection" class="hidden">
+        <div class="form-group phone-input">
+          <label>Phone Number to Call</label>
+          <input type="tel" id="phoneNumber" placeholder="+1234567890" />
+        </div>
+        <button id="callBtn" class="btn-success" onclick="makeCall()">
+          📞 Make Call
+        </button>
+        <button id="hangupBtn" class="btn-danger hidden" onclick="hangup()">
+          ❌ Hang Up
+        </button>
+        <button class="btn-primary" onclick="logout()">Logout</button>
+      </div>
+
+      <!-- Status Display -->
+      <div id="status"></div>
     </div>
 
     <script>
-        let device;
-        let connection;
-        const API_BASE = 'http://localhost:8000/api';
+      let device;
+      let connection;
+      const API_BASE = "http://localhost:8000/api";
 
-        function showStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('status');
-            statusDiv.className = `status ${type}`;
-            statusDiv.innerHTML = message;
-            statusDiv.style.display = 'block';
+      function handleCall(call) {
+        connection = call;
+        showStatus("📞 Call in progress...", "success");
+        document.getElementById("callBtn").classList.add("hidden");
+        document.getElementById("hangupBtn").classList.remove("hidden");
+
+        call.on("accept", () => {
+          showStatus("📞 Call connected!", "success");
+        });
+
+        call.on("disconnect", () => {
+          showStatus("Call ended", "info");
+          document.getElementById("callBtn").classList.remove("hidden");
+          document.getElementById("hangupBtn").classList.add("hidden");
+          connection = null;
+        });
+
+        call.on("error", (error) => {
+          showStatus(`❌ Call Error: ${error.message}`, "error");
+        });
+      }
+
+      function showStatus(message, type = "info") {
+        const statusDiv = document.getElementById("status");
+        statusDiv.className = `status ${type}`;
+        statusDiv.innerHTML = message;
+        statusDiv.style.display = "block";
+      }
+
+      async function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (!username || !password) {
+          showStatus("Please enter username and password", "error");
+          return;
         }
 
-        async function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        showStatus('<div class="spinner"></div>Logging in...', "info");
 
-            if (!username || !password) {
-                showStatus('Please enter username and password', 'error');
-                return;
-            }
+        try {
+          // Step 1: Login
+          const loginResponse = await fetch(`${API_BASE}/auth/login/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
 
-            showStatus('<div class="spinner"></div>Logging in...', 'info');
+          if (!loginResponse.ok) {
+            throw new Error("Login failed. Check username and password.");
+          }
 
-            try {
-                // Step 1: Login
-                const loginResponse = await fetch(`${API_BASE}/auth/login/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
+          const { access } = await loginResponse.json();
+          localStorage.setItem("accessToken", access);
 
-                if (!loginResponse.ok) {
-                    throw new Error('Login failed. Check username and password.');
-                }
+          // Step 2: Get Twilio Token
+          showStatus(
+            '<div class="spinner"></div>Getting Twilio token...',
+            "info"
+          );
 
-                const { access } = await loginResponse.json();
-                localStorage.setItem('accessToken', access);
+          const tokenResponse = await fetch(`${API_BASE}/twilio/token/`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${access}` },
+          });
 
-                // Step 2: Get Twilio Token
-                showStatus('<div class="spinner"></div>Getting Twilio token...', 'info');
-                
-                const tokenResponse = await fetch(`${API_BASE}/twilio/token/`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${access}` }
-                });
+          if (!tokenResponse.ok) {
+            throw new Error("Failed to get Twilio token");
+          }
 
-                if (!tokenResponse.ok) {
-                    throw new Error('Failed to get Twilio token');
-                }
+          const { token, identity } = await tokenResponse.json();
 
-                const { token, identity } = await tokenResponse.json();
+          // Step 3: Initialize Twilio Device
+          showStatus(
+            '<div class="spinner"></div>Connecting to Twilio...',
+            "info"
+          );
 
-                // Step 3: Initialize Twilio Device
-                showStatus('<div class="spinner"></div>Connecting to Twilio...', 'info');
-                
-                device = new Twilio.Device(token);
+          device = new Twilio.Device(token, {
+            // Start registration immediately
+          });
+          device.register();
 
-                device.on('ready', () => {
-                    showStatus(`✅ Ready! Connected as ${identity}`, 'success');
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('callSection').classList.remove('hidden');
-                });
+          device.on("registered", () => {
+            showStatus(`✅ Ready! Connected as ${identity}`, "success");
+            document.getElementById("loginSection").classList.add("hidden");
+            document.getElementById("callSection").classList.remove("hidden");
+          });
 
-                device.on('error', (error) => {
-                    showStatus(`❌ Error: ${error.message}`, 'error');
-                });
+          device.on("error", (error) => {
+            showStatus(`❌ Error: ${error.message}`, "error");
+          });
 
-                device.on('connect', (conn) => {
-                    connection = conn;
-                    showStatus('📞 Call connected!', 'success');
-                    document.getElementById('callBtn').classList.add('hidden');
-                    document.getElementById('hangupBtn').classList.remove('hidden');
-                });
-
-                device.on('disconnect', () => {
-                    showStatus('Call ended', 'info');
-                    document.getElementById('callBtn').classList.remove('hidden');
-                    document.getElementById('hangupBtn').classList.add('hidden');
-                    connection = null;
-                });
-
-                device.on('incoming', (conn) => {
-                    showStatus('📞 Incoming call! Click answer to accept.', 'warning');
-                    if (confirm('Incoming call! Answer?')) {
-                        conn.accept();
-                    } else {
-                        conn.reject();
-                    }
-                });
-
-            } catch (error) {
-                showStatus(`❌ ${error.message}`, 'error');
-            }
-        }
-
-        async function makeCall() {
-            const phoneNumber = document.getElementById('phoneNumber').value;
-
-            if (!phoneNumber) {
-                showStatus('Please enter a phone number', 'error');
-                return;
-            }
-
-            if (!device) {
-                showStatus('Please login first', 'error');
-                return;
-            }
-
-            try {
-                showStatus(`📞 Calling ${phoneNumber}...`, 'info');
-                connection = device.connect({ To: phoneNumber });
-            } catch (error) {
-                showStatus(`❌ Error: ${error.message}`, 'error');
-            }
-        }
-
-        function hangup() {
-            if (connection) {
-                connection.disconnect();
-            } else if (device) {
-                device.disconnectAll();
-            }
-        }
-
-        function logout() {
-            if (device) {
-                device.disconnectAll();
-                device.destroy();
-                device = null;
-            }
-            localStorage.removeItem('accessToken');
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('callSection').classList.add('hidden');
-            showStatus('Logged out', 'info');
-        }
-
-        // Auto-login if token exists
-        window.onload = () => {
-            const token = localStorage.getItem('accessToken');
-            if (token) {
-                // Token exists, but may be expired - just show login form
-                showStatus('Please login to start', 'info');
+          device.on("incoming", (call) => {
+            showStatus("📞 Incoming call! Click answer to accept.", "warning");
+            if (confirm("Incoming call! Answer?")) {
+              call.accept();
+              handleCall(call);
             } else {
-                showStatus('Please login to start', 'info');
+              call.reject();
             }
-        };
+          });
+        } catch (error) {
+          showStatus(`❌ ${error.message}`, "error");
+        }
+      }
+
+      async function makeCall() {
+        const phoneNumber = document.getElementById("phoneNumber").value;
+
+        if (!phoneNumber) {
+          showStatus("Please enter a phone number", "error");
+          return;
+        }
+
+        if (!device) {
+          showStatus("Please login first", "error");
+          return;
+        }
+
+        try {
+          showStatus(`📞 Calling ${phoneNumber}...`, "info");
+          const call = await device.connect({ params: { To: phoneNumber } });
+          handleCall(call);
+        } catch (error) {
+          showStatus(`❌ Error: ${error.message}`, "error");
+        }
+      }
+
+      function hangup() {
+        if (connection) {
+          connection.disconnect();
+        } else if (device) {
+          device.disconnectAll();
+        }
+      }
+
+      function logout() {
+        if (device) {
+          device.disconnectAll();
+          device.destroy();
+          device = null;
+        }
+        localStorage.removeItem("accessToken");
+        document.getElementById("loginSection").classList.remove("hidden");
+        document.getElementById("callSection").classList.add("hidden");
+        showStatus("Logged out", "info");
+      }
+
+      // Auto-login if token exists
+      window.onload = () => {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+          // Token exists, but may be expired - just show login form
+          showStatus("Please login to start", "info");
+        } else {
+          showStatus("Please login to start", "info");
+        }
+      };
     </script>
-</body>
+  </body>
 </html>

@@ -23,6 +23,8 @@ class TwilioService:
         self.auth_token = settings.TWILIO_AUTH_TOKEN
         self.phone_number = settings.TWILIO_PHONE_NUMBER
         self.app_sid = settings.TWILIO_APP_SID
+        self.api_key_sid = getattr(settings, 'TWILIO_API_KEY_SID', None)
+        self.api_key_secret = getattr(settings, 'TWILIO_API_KEY_SECRET', None)
         self._client = None
 
     @property
@@ -49,12 +51,18 @@ class TwilioService:
             JWT access token string
         """
         try:
-            # Create access token with Account SID as signing key
-            # For production, you should create API Keys in Twilio Console
+            # Create access token with API Key SID as signing key
+            # For production, we must use API Keys created in Twilio Console
+            if not self.api_key_sid or not self.api_key_secret:
+                raise ValueError(
+                    "Twilio API Keys not configured. "
+                    "Please set TWILIO_API_KEY_SID and TWILIO_API_KEY_SECRET in .env file"
+                )
+            
             token = AccessToken(
                 self.account_sid,
-                self.account_sid,  # Using Account SID as API Key for development
-                self.auth_token,   # Using Auth Token as secret
+                self.api_key_sid,
+                self.api_key_secret,
                 identity=identity,
                 ttl=ttl
             )

@@ -31,6 +31,9 @@ urlpatterns = [
     # Client Applications
     path('', agent_call_client, name='home'),
     path('agent_call_client.html', agent_call_client, name='agent_call_client'),
+    
+    # Test Config Page
+    path('test_config.html', TemplateView.as_view(template_name='test_config.html'), name='test_config'),
 
     # API Documentation
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
